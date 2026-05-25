@@ -1,0 +1,28 @@
+function createBoard(container, boardName) {
+  const boardWrapper = document.createElement("div");
+
+  const title = document.createElement("h2");
+  title.textContent = boardName;
+
+  const board = document.createElement("div");
+  board.classList.add("board");
+
+  for (let y = 0; y < 10; y++) {
+    for (let x = 0; x < 10; x++) {
+      const cell = document.createElement("div");
+
+      cell.classList.add("cell");
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+
+      board.appendChild(cell);
+    }
+  }
+
+  boardWrapper.appendChild(title);
+  boardWrapper.appendChild(board);
+
+  container.appendChild(boardWrapper);
+}
+
+export default createBoard;
