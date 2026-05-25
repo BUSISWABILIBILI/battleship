@@ -31,6 +31,10 @@ class Gameboard {
 
     this.missedAttacks.push(attackCoordinates);
   }
+
+  allShipsSunk() {
+    return this.ships.every((shipData) => shipData.ship.isSunk());
+  }
 }
 
 export default Gameboard;

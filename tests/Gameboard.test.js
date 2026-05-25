@@ -44,3 +44,30 @@ test("hits the correct ship", () => {
 
   expect(gameboard.ships[0].ship.hits).toBe(1);
 });
+
+test("returns false if not all ships are sunk", () => {
+  const gameboard = new Gameboard();
+
+  gameboard.placeShip(2, [
+    [0, 0],
+    [0, 1],
+  ]);
+
+  gameboard.receiveAttack([0, 0]);
+
+  expect(gameboard.allShipsSunk()).toBe(false);
+});
+
+test("returns true if all ships are sunk", () => {
+  const gameboard = new Gameboard();
+
+  gameboard.placeShip(2, [
+    [0, 0],
+    [0, 1],
+  ]);
+
+  gameboard.receiveAttack([0, 0]);
+  gameboard.receiveAttack([0, 1]);
+
+  expect(gameboard.allShipsSunk()).toBe(true);
+});
