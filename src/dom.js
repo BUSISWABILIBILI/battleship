@@ -1,4 +1,4 @@
-function createBoard(container, boardName) {
+function createBoard(container, boardName, handleCellClick = null) {
   const boardWrapper = document.createElement("div");
 
   const title = document.createElement("h2");
@@ -14,6 +14,12 @@ function createBoard(container, boardName) {
       cell.classList.add("cell");
       cell.dataset.x = x;
       cell.dataset.y = y;
+
+      if (handleCellClick) {
+        cell.addEventListener("click", () => {
+          handleCellClick([x, y], cell);
+        });
+      }
 
       board.appendChild(cell);
     }

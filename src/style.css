@@ -29,3 +29,11 @@ body {
   background-color: #475569;
   cursor: pointer;
 }
+
+.cell.hit {
+  background-color: #dc2626;
+}
+
+.cell.miss {
+  background-color: #64748b;
+}
