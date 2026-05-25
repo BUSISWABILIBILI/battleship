@@ -1,5 +1,5 @@
 import "./style.css";
-import createBoard from "./dom";
+import { createBoard, renderShips } from "./dom";
 import Player from "./Player";
 
 const app = document.querySelector("#app");
@@ -64,21 +64,22 @@ function handleComputerBoardClick(coordinates, cell) {
   } else {
     playerCell.classList.add("hit");
   }
-}
 
-if (computer.gameboard.allShipsSunk()) {
-  statusMessage.textContent = "You win! All computer ships have been sunk.";
-  gameOver = true;
-  return;
-}
+  if (computer.gameboard.allShipsSunk()) {
+    statusMessage.textContent = "You win! All computer ships have been sunk.";
+    gameOver = true;
+    return;
+  }
 
-if (player.gameboard.allShipsSunk()) {
-  statusMessage.textContent = "Computer wins! All your ships have been sunk.";
-  gameOver = true;
-  return;
-}
+  if (player.gameboard.allShipsSunk()) {
+    statusMessage.textContent = "Computer wins! All your ships have been sunk.";
+    gameOver = true;
+    return;
+  }
 
-statusMessage.textContent = "Your turn! Attack another square.";
+  statusMessage.textContent = "Your turn! Attack another square.";
+}
 
 const playerCells = createBoard(app, "Player");
+renderShips(playerCells, player.gameboard.ships);
 createBoard(app, "Computer", handleComputerBoardClick);

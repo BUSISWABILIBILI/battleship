@@ -36,4 +36,14 @@ function createBoard(container, boardName, handleCellClick = null) {
   return cells;
 }
 
-export default createBoard;
+function renderShips(cells, ships) {
+  for (const shipData of ships) {
+    for (const coordinate of shipData.coordinates) {
+      const key = coordinate.toString();
+
+      cells[key].classList.add("ship");
+    }
+  }
+}
+
+export { createBoard, renderShips };

@@ -44,3 +44,7 @@ body {
   font-weight: bold;
   margin-bottom: 2rem;
 }
+
+.cell.ship {
+  background-color: #0ea5e9;
+}
