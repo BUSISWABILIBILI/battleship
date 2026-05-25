@@ -13,6 +13,12 @@ computer.gameboard.placeShip(3, [
   [0, 2],
 ]);
 
+player.gameboard.placeShip(3, [
+  [4, 4],
+  [4, 5],
+  [4, 6],
+]);
+
 function handleComputerBoardClick(coordinates, cell) {
   computer.gameboard.receiveAttack(coordinates);
 
@@ -25,6 +31,11 @@ function handleComputerBoardClick(coordinates, cell) {
   } else {
     cell.classList.add("hit");
   }
+
+  computer.randomAttack(player.gameboard);
+
+  console.log("Player missed attacks:", player.gameboard.missedAttacks);
+  console.log("Player ships:", player.gameboard.ships);
 }
 
 createBoard(app, "Player");
