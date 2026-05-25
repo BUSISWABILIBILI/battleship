@@ -10,6 +10,15 @@ statusMessage.classList.add("status-message");
 statusMessage.textContent = "Attack the computer's board to start the game!";
 app.before(statusMessage);
 
+const restartButton = document.createElement("button");
+restartButton.classList.add("restart-button");
+restartButton.textContent = "Restart Game";
+statusMessage.after(restartButton);
+
+restartButton.addEventListener("click", () => {
+  window.location.reload();
+});
+
 let gameOver = false;
 
 const player = new Player("real");
