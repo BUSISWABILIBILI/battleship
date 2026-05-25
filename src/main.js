@@ -1,6 +1,7 @@
 import "./style.css";
 import { createBoard, renderShips } from "./dom";
 import Player from "./Player";
+import { placeRandomShip } from "./shipPlacement";
 
 const app = document.querySelector("#app");
 
@@ -14,17 +15,13 @@ let gameOver = false;
 const player = new Player("real");
 const computer = new Player("computer");
 
-computer.gameboard.placeShip(3, [
-  [0, 0],
-  [0, 1],
-  [0, 2],
-]);
+placeRandomShip(computer.gameboard, 5);
+placeRandomShip(computer.gameboard, 4);
+placeRandomShip(computer.gameboard, 3);
 
-player.gameboard.placeShip(3, [
-  [4, 4],
-  [4, 5],
-  [4, 6],
-]);
+placeRandomShip(player.gameboard, 5);
+placeRandomShip(player.gameboard, 4);
+placeRandomShip(player.gameboard, 3);
 
 function handleComputerBoardClick(coordinates, cell) {
   if (gameOver) {
