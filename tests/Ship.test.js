@@ -1,4 +1,4 @@
-import Ship from "../src/Ship.js";
+import Ship from "../src/Ship";
 
 test("create a ship with a given length and 0 hits", () => {
   const ship = new Ship(3);

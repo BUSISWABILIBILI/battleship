@@ -1,4 +1,4 @@
-import Gameboard from "../src/Gameboard.js";
+import Gameboard from "../src/Gameboard";
 
 test("create an empty gameboard", () => {
   const gameboard = new Gameboard();
@@ -22,4 +22,25 @@ test("places a ship at given coordinates", () => {
     [0, 1],
     [0, 2],
   ]);
+});
+
+test("records missed attacks", () => {
+  const gameboard = new Gameboard();
+
+  gameboard.receiveAttack([5, 5]);
+
+  expect(gameboard.missedAttacks).toContainEqual([5, 5]);
+});
+
+test("hits the correct ship", () => {
+  const gameboard = new Gameboard();
+
+  gameboard.placeShip(2, [
+    [0, 0],
+    [0, 1],
+  ]);
+
+  gameboard.receiveAttack([0, 0]);
+
+  expect(gameboard.ships[0].ship.hits).toBe(1);
 });

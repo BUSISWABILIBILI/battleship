@@ -14,6 +14,23 @@ class Gameboard {
       coordinates,
     });
   }
+
+  receiveAttack(attackCoordinates) {
+    for (const shipData of this.ships) {
+      const hit = shipData.coordinates.some(
+        (coordinate) =>
+          coordinate[0] === attackCoordinates[0] &&
+          coordinate[1] === attackCoordinates[1],
+      );
+
+      if (hit) {
+        shipData.ship.hit();
+        return;
+      }
+    }
+
+    this.missedAttacks.push(attackCoordinates);
+  }
 }
 
 export default Gameboard;
