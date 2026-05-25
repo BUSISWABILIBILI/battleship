@@ -7,6 +7,8 @@ function createBoard(container, boardName, handleCellClick = null) {
   const board = document.createElement("div");
   board.classList.add("board");
 
+  const cells = {};
+
   for (let y = 0; y < 10; y++) {
     for (let x = 0; x < 10; x++) {
       const cell = document.createElement("div");
@@ -15,12 +17,13 @@ function createBoard(container, boardName, handleCellClick = null) {
       cell.dataset.x = x;
       cell.dataset.y = y;
 
+      cells[`${x},${y}`] = cell;
+
       if (handleCellClick) {
         cell.addEventListener("click", () => {
           handleCellClick([x, y], cell);
         });
       }
-
       board.appendChild(cell);
     }
   }
@@ -29,6 +32,8 @@ function createBoard(container, boardName, handleCellClick = null) {
   boardWrapper.appendChild(board);
 
   container.appendChild(boardWrapper);
+
+  return cells;
 }
 
 export default createBoard;

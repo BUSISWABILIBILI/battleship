@@ -34,9 +34,22 @@ function handleComputerBoardClick(coordinates, cell) {
 
   computer.randomAttack(player.gameboard);
 
-  console.log("Player missed attacks:", player.gameboard.missedAttacks);
-  console.log("Player ships:", player.gameboard.ships);
+  const computerAttack =
+    computer.previousAttacks[computer.previousAttacks.length - 1];
+
+  const playerCell = playerCells[computerAttack.toString()];
+
+  const computerMissed = player.gameboard.missedAttacks.some(
+    (attack) =>
+      attack[0] === computerAttack[0] && attack[1] === computerAttack[1],
+  );
+
+  if (computerMissed) {
+    playerCell.classList.add("miss");
+  } else {
+    playerCell.classList.add("hit");
+  }
 }
 
-createBoard(app, "Player");
+const playerCells = createBoard(app, "Player");
 createBoard(app, "Computer", handleComputerBoardClick);
