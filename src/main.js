@@ -20,6 +20,10 @@ player.gameboard.placeShip(3, [
 ]);
 
 function handleComputerBoardClick(coordinates, cell) {
+  if (cell.classList.contains("hit") || cell.classList.contains("miss")) {
+    return;
+  }
+
   computer.gameboard.receiveAttack(coordinates);
 
   const missed = computer.gameboard.missedAttacks.some(
