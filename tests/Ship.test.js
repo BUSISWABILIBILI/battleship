@@ -14,3 +14,21 @@ test("increments hits when hit is called", () => {
 
   expect(ship.hits).toBe(1);
 });
+
+test("returns false if ship is not sunk", () => {
+  const ship = new Ship(3);
+
+  ship.hit();
+  ship.hit();
+
+  expect(ship.isSunk()).toBe(false);
+});
+
+test("returns true if ship is sunk", () => {
+  const ship = new Ship(2);
+
+  ship.hit();
+  ship.hit();
+
+  expect(ship.isSunk()).toBe(true);
+});
