@@ -37,3 +37,10 @@ body {
 .cell.miss {
   background-color: #64748b;
 }
+
+.status-message {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
