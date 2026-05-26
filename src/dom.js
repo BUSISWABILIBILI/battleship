@@ -1,25 +1,89 @@
-function createBoard(container, boardName, handleCellClick = null) {
-  const boardWrapper = document.createElement("div");
+const COLUMN_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+function formatCoordinate(coordinates) {
+  return `${COLUMN_LABELS[coordinates[0]]}${coordinates[1] + 1}`;
+}
+
+function slugify(value) {
+  return value.toLowerCase().replace(/\s+/g, "-");
+}
+
+function createBoard(
+  container,
+  boardName,
+  handleCellClick = null,
+  options = {},
+) {
+  const { panelClass = "", subtitle = "" } = options;
+  const boardWrapper = document.createElement("section");
+  boardWrapper.classList.add("board-panel");
+
+  if (panelClass) {
+    boardWrapper.classList.add(panelClass);
+  }
+
+  const titleId = `${slugify(boardName)}-title`;
+  boardWrapper.setAttribute("aria-labelledby", titleId);
 
   const title = document.createElement("h2");
+  title.id = titleId;
   title.textContent = boardName;
+
+  const header = document.createElement("div");
+  header.classList.add("board-header");
+  header.appendChild(title);
+
+  if (subtitle) {
+    const subtitleElement = document.createElement("p");
+    subtitleElement.textContent = subtitle;
+    header.appendChild(subtitleElement);
+  }
 
   const board = document.createElement("div");
   board.classList.add("board");
+  board.setAttribute("aria-label", `${boardName} grid`);
+
+  const corner = document.createElement("span");
+  corner.classList.add("coordinate-label", "corner-label");
+  corner.setAttribute("aria-hidden", "true");
+  board.appendChild(corner);
+
+  for (const label of COLUMN_LABELS) {
+    const coordinateLabel = document.createElement("span");
+    coordinateLabel.classList.add("coordinate-label");
+    coordinateLabel.textContent = label;
+    coordinateLabel.setAttribute("aria-hidden", "true");
+    board.appendChild(coordinateLabel);
+  }
 
   const cells = {};
 
   for (let y = 0; y < 10; y++) {
+    const rowLabel = document.createElement("span");
+    rowLabel.classList.add("coordinate-label", "row-label");
+    rowLabel.textContent = y + 1;
+    rowLabel.setAttribute("aria-hidden", "true");
+    board.appendChild(rowLabel);
+
     for (let x = 0; x < 10; x++) {
-      const cell = document.createElement("div");
+      const coordinateLabel = formatCoordinate([x, y]);
+      const cell = document.createElement(handleCellClick ? "button" : "div");
 
       cell.classList.add("cell");
       cell.dataset.x = x;
       cell.dataset.y = y;
+      cell.dataset.coordinate = coordinateLabel;
+      cell.setAttribute("aria-label", `${boardName} ${coordinateLabel}`);
 
       cells[`${x},${y}`] = cell;
 
       if (handleCellClick) {
+        cell.type = "button";
+        cell.classList.add("target-cell");
+        cell.setAttribute(
+          "aria-label",
+          `Attack ${coordinateLabel} on ${boardName}`,
+        );
         cell.addEventListener("click", () => {
           handleCellClick([x, y], cell);
         });
@@ -28,7 +92,7 @@ function createBoard(container, boardName, handleCellClick = null) {
     }
   }
 
-  boardWrapper.appendChild(title);
+  boardWrapper.appendChild(header);
   boardWrapper.appendChild(board);
 
   container.appendChild(boardWrapper);
@@ -40,10 +104,12 @@ function renderShips(cells, ships) {
   for (const shipData of ships) {
     for (const coordinate of shipData.coordinates) {
       const key = coordinate.toString();
+      const cell = cells[key];
 
-      cells[key].classList.add("ship");
+      cell.classList.add("ship");
+      cell.setAttribute("aria-label", `Ship at ${cell.dataset.coordinate}`);
     }
   }
 }
 
-export { createBoard, renderShips };
+export { createBoard, formatCoordinate, renderShips };
