@@ -100,6 +100,16 @@ function createBoard(
   return cells;
 }
 
+function clearShips(cells, boardName = "Grid") {
+  for (const cell of Object.values(cells)) {
+    cell.classList.remove("ship");
+    cell.setAttribute(
+      "aria-label",
+      `${boardName} ${cell.dataset.coordinate}`,
+    );
+  }
+}
+
 function renderShips(cells, ships) {
   for (const shipData of ships) {
     for (const coordinate of shipData.coordinates) {
@@ -112,4 +122,4 @@ function renderShips(cells, ships) {
   }
 }
 
-export { createBoard, formatCoordinate, renderShips };
+export { clearShips, createBoard, formatCoordinate, renderShips };

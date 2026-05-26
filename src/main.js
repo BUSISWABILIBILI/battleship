@@ -1,6 +1,6 @@
 import "./style.css";
-import { createBoard, formatCoordinate, renderShips } from "./dom";
-import { CLASSIC_FLEET } from "./fleet";
+import { clearShips, createBoard, formatCoordinate, renderShips } from "./dom";
+import { EXPANDED_FLEET } from "./fleet";
 import Player from "./Player";
 import { placeFleet } from "./shipPlacement";
 
@@ -29,10 +29,18 @@ const statusMessage = document.createElement("div");
 statusMessage.classList.add("status-message");
 statusMessage.setAttribute("role", "status");
 statusMessage.setAttribute("aria-live", "polite");
-statusMessage.textContent = "Classic fleet deployed. Fire on enemy waters.";
+statusMessage.textContent = "Expanded fleet deployed. Fire on enemy waters.";
 
 const stats = document.createElement("div");
 stats.classList.add("stats");
+
+const commandActions = document.createElement("div");
+commandActions.classList.add("command-actions");
+
+const randomiseButton = document.createElement("button");
+randomiseButton.classList.add("secondary-button");
+randomiseButton.type = "button";
+randomiseButton.textContent = "Randomise Fleet";
 
 const restartButton = document.createElement("button");
 restartButton.classList.add("restart-button");
@@ -43,7 +51,8 @@ restartButton.addEventListener("click", () => {
   window.location.reload();
 });
 
-commandPanel.append(statusMessage, stats, restartButton);
+commandActions.append(randomiseButton, restartButton);
+commandPanel.append(statusMessage, stats, commandActions);
 gameHeader.append(headingGroup, commandPanel);
 
 const boards = document.createElement("section");
@@ -52,12 +61,14 @@ boards.classList.add("boards");
 app.append(gameHeader, boards);
 
 let gameOver = false;
+let gameStarted = false;
 
 const player = new Player("real");
 const computer = new Player("computer");
+const activeFleet = EXPANDED_FLEET;
 
-placeFleet(computer.gameboard, CLASSIC_FLEET);
-placeFleet(player.gameboard, CLASSIC_FLEET);
+placeFleet(computer.gameboard, activeFleet);
+placeFleet(player.gameboard, activeFleet);
 
 function getHitCount(gameboard) {
   return gameboard.ships.reduce(
@@ -137,6 +148,20 @@ function disableComputerBoard() {
   });
 }
 
+function randomisePlayerFleet() {
+  if (gameStarted) {
+    return;
+  }
+
+  player.gameboard.ships = [];
+  player.gameboard.missedAttacks = [];
+  placeFleet(player.gameboard, activeFleet);
+  clearShips(playerCells, "Your Fleet");
+  renderShips(playerCells, player.gameboard.ships);
+  statusMessage.textContent = "Your fleet has been randomised.";
+  updateStats();
+}
+
 function handleComputerBoardClick(coordinates, cell) {
   if (gameOver) {
     return;
@@ -144,6 +169,11 @@ function handleComputerBoardClick(coordinates, cell) {
 
   if (cell.classList.contains("hit") || cell.classList.contains("miss")) {
     return;
+  }
+
+  if (!gameStarted) {
+    gameStarted = true;
+    randomiseButton.disabled = true;
   }
 
   const playerCoordinate = formatCoordinate(coordinates);
@@ -193,7 +223,7 @@ function handleComputerBoardClick(coordinates, cell) {
 
 const playerCells = createBoard(boards, "Your Fleet", null, {
   panelClass: "player-board",
-  subtitle: "Computer salvos land here.",
+  subtitle: `${activeFleet.length} ships deployed. Computer salvos land here.`,
 });
 renderShips(playerCells, player.gameboard.ships);
 const computerCells = createBoard(
@@ -205,5 +235,7 @@ const computerCells = createBoard(
     subtitle: "Choose a coordinate to fire.",
   },
 );
+
+randomiseButton.addEventListener("click", randomisePlayerFleet);
 
 updateStats();
