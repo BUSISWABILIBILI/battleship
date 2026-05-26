@@ -1,4 +1,4 @@
-import Gameboard from "./Gameboard";
+import Gameboard from "./Gameboard.js";
 
 const BOARD_SIZE = 10;
 

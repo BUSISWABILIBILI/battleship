@@ -1,4 +1,3 @@
-import "./style.css";
 import {
   clearShips,
   createBoard,
@@ -6,10 +5,10 @@ import {
   renderFleetTargets,
   renderShips,
   updateFleetTargets,
-} from "./dom";
-import { EXPANDED_FLEET } from "./fleet";
-import Player from "./Player";
-import { placeFleet } from "./shipPlacement";
+} from "./dom.js";
+import { EXPANDED_FLEET } from "./fleet.js";
+import Player from "./Player.js";
+import { placeFleet } from "./shipPlacement.js";
 
 const app = document.querySelector("#app");
 app.classList.add("game-shell");
