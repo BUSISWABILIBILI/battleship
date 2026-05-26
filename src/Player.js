@@ -20,7 +20,8 @@ class Player {
     );
 
     this.previousAttacks.push(attack);
-    enemyGameboard.receiveAttack(attack);
+
+    return enemyGameboard.receiveAttack(attack);
   }
 }
 

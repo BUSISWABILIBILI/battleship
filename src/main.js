@@ -1,7 +1,8 @@
 import "./style.css";
 import { createBoard, formatCoordinate, renderShips } from "./dom";
+import { CLASSIC_FLEET } from "./fleet";
 import Player from "./Player";
-import { placeRandomShip } from "./shipPlacement";
+import { placeFleet } from "./shipPlacement";
 
 const app = document.querySelector("#app");
 app.classList.add("game-shell");
@@ -28,7 +29,7 @@ const statusMessage = document.createElement("div");
 statusMessage.classList.add("status-message");
 statusMessage.setAttribute("role", "status");
 statusMessage.setAttribute("aria-live", "polite");
-statusMessage.textContent = "Fire on enemy waters to begin.";
+statusMessage.textContent = "Classic fleet deployed. Fire on enemy waters.";
 
 const stats = document.createElement("div");
 stats.classList.add("stats");
@@ -55,13 +56,8 @@ let gameOver = false;
 const player = new Player("real");
 const computer = new Player("computer");
 
-placeRandomShip(computer.gameboard, 5);
-placeRandomShip(computer.gameboard, 4);
-placeRandomShip(computer.gameboard, 3);
-
-placeRandomShip(player.gameboard, 5);
-placeRandomShip(player.gameboard, 4);
-placeRandomShip(player.gameboard, 3);
+placeFleet(computer.gameboard, CLASSIC_FLEET);
+placeFleet(player.gameboard, CLASSIC_FLEET);
 
 function getHitCount(gameboard) {
   return gameboard.ships.reduce(
@@ -113,10 +109,16 @@ function updateStats() {
   );
 }
 
-function attackMissed(gameboard, coordinates) {
-  return gameboard.missedAttacks.some(
-    (attack) => attack[0] === coordinates[0] && attack[1] === coordinates[1],
-  );
+function formatAttackMessage(actor, coordinate, attack) {
+  if (attack.result === "miss") {
+    return `${actor} missed ${coordinate}`;
+  }
+
+  if (attack.sunk) {
+    return `${actor} hit ${coordinate} and sunk ${attack.ship.name}`;
+  }
+
+  return `${actor} hit ${coordinate}: ${attack.ship.name}`;
 }
 
 function markCell(cell, result, label) {
@@ -144,42 +146,48 @@ function handleComputerBoardClick(coordinates, cell) {
     return;
   }
 
-  computer.gameboard.receiveAttack(coordinates);
-
   const playerCoordinate = formatCoordinate(coordinates);
-  const missed = attackMissed(computer.gameboard, coordinates);
-  const playerResult = missed ? "miss" : "hit";
+  const playerAttack = computer.gameboard.receiveAttack(coordinates);
+  const playerResult = playerAttack.result;
 
   markCell(cell, playerResult, playerCoordinate);
 
   if (computer.gameboard.allShipsSunk()) {
-    statusMessage.textContent = `Direct hit at ${playerCoordinate}. You win.`;
+    statusMessage.textContent = `${formatAttackMessage(
+      "You",
+      playerCoordinate,
+      playerAttack,
+    )}. You win.`;
     gameOver = true;
     disableComputerBoard();
     updateStats();
     return;
   }
 
-  computer.randomAttack(player.gameboard);
-
-  const computerAttack =
-    computer.previousAttacks[computer.previousAttacks.length - 1];
-  const playerCell = playerCells[computerAttack.toString()];
-  const computerCoordinate = formatCoordinate(computerAttack);
-  const computerMissed = attackMissed(player.gameboard, computerAttack);
-  const computerResult = computerMissed ? "miss" : "hit";
+  const computerAttack = computer.randomAttack(player.gameboard);
+  const playerCell = playerCells[computerAttack.coordinates.toString()];
+  const computerCoordinate = formatCoordinate(computerAttack.coordinates);
+  const computerResult = computerAttack.result;
 
   markCell(playerCell, computerResult, computerCoordinate);
 
   if (player.gameboard.allShipsSunk()) {
-    statusMessage.textContent = `Enemy ${computerResult} at ${computerCoordinate}. Computer wins.`;
+    statusMessage.textContent = `${formatAttackMessage(
+      "Enemy",
+      computerCoordinate,
+      computerAttack,
+    )}. Computer wins.`;
     gameOver = true;
     disableComputerBoard();
     updateStats();
     return;
   }
 
-  statusMessage.textContent = `You ${playerResult} ${playerCoordinate}. Enemy ${computerResult} at ${computerCoordinate}.`;
+  statusMessage.textContent = `${formatAttackMessage(
+    "You",
+    playerCoordinate,
+    playerAttack,
+  )}. ${formatAttackMessage("Enemy", computerCoordinate, computerAttack)}.`;
   updateStats();
 }
 

@@ -45,7 +45,9 @@ function hasOverlap(existingShips, coordinates) {
   );
 }
 
-function placeRandomShip(gameboard, length) {
+function placeRandomShip(gameboard, ship) {
+  const length = typeof ship === "number" ? ship : ship.length;
+  const name = typeof ship === "number" ? "Ship" : ship.name;
   let coordinates;
 
   do {
@@ -55,7 +57,13 @@ function placeRandomShip(gameboard, length) {
     coordinates = createCoordinates(start, length, direction);
   } while (hasOverlap(gameboard.ships, coordinates));
 
-  gameboard.placeShip(length, coordinates);
+  gameboard.placeShip(length, coordinates, name);
 }
 
-export { placeRandomShip };
+function placeFleet(gameboard, fleet) {
+  for (const ship of fleet) {
+    placeRandomShip(gameboard, ship);
+  }
+}
+
+export { placeFleet, placeRandomShip };

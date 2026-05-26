@@ -11,7 +11,7 @@ test("computer can make a random attack", () => {
   const computer = new Player("computer");
   const enemy = new Player("real");
 
-  computer.randomAttack(enemy.gameboard);
+  const result = computer.randomAttack(enemy.gameboard);
 
   const totalAttacks =
     enemy.gameboard.missedAttacks.length +
@@ -19,5 +19,7 @@ test("computer can make a random attack", () => {
       return total + shipData.ship.hits;
     }, 0);
 
+  expect(result.coordinates).toHaveLength(2);
+  expect(["hit", "miss"]).toContain(result.result);
   expect(totalAttacks).toBe(1);
 });
