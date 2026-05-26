@@ -1,5 +1,12 @@
 import "./style.css";
-import { clearShips, createBoard, formatCoordinate, renderShips } from "./dom";
+import {
+  clearShips,
+  createBoard,
+  formatCoordinate,
+  renderFleetTargets,
+  renderShips,
+  updateFleetTargets,
+} from "./dom";
 import { EXPANDED_FLEET } from "./fleet";
 import Player from "./Player";
 import { placeFleet } from "./shipPlacement";
@@ -118,6 +125,13 @@ function updateStats() {
     ),
     renderStat("Misses", computer.gameboard.missedAttacks.length),
   );
+
+  updateFleetTargets(playerFleetTargets, player.gameboard.ships, "Your fleet");
+  updateFleetTargets(
+    computerFleetTargets,
+    computer.gameboard.ships,
+    "Enemy fleet",
+  );
 }
 
 function formatAttackMessage(actor, coordinate, attack) {
@@ -158,6 +172,7 @@ function randomisePlayerFleet() {
   placeFleet(player.gameboard, activeFleet);
   clearShips(playerCells, "Your Fleet");
   renderShips(playerCells, player.gameboard.ships);
+  renderFleetTargets(playerFleetTargets, player.gameboard.ships, "Your fleet");
   statusMessage.textContent = "Your fleet has been randomised.";
   updateStats();
 }
@@ -224,6 +239,7 @@ function handleComputerBoardClick(coordinates, cell) {
 const playerCells = createBoard(boards, "Your Fleet", null, {
   panelClass: "player-board",
   subtitle: `${activeFleet.length} ships deployed. Computer salvos land here.`,
+  targetSide: "left",
 });
 renderShips(playerCells, player.gameboard.ships);
 const computerCells = createBoard(
@@ -233,7 +249,22 @@ const computerCells = createBoard(
   {
     panelClass: "computer-board",
     subtitle: "Choose a coordinate to fire.",
+    targetSide: "right",
   },
+);
+
+const playerFleetTargets = document.querySelector(
+  ".player-board .fleet-targets",
+);
+const computerFleetTargets = document.querySelector(
+  ".computer-board .fleet-targets",
+);
+
+renderFleetTargets(playerFleetTargets, player.gameboard.ships, "Your fleet");
+renderFleetTargets(
+  computerFleetTargets,
+  computer.gameboard.ships,
+  "Enemy fleet",
 );
 
 randomiseButton.addEventListener("click", randomisePlayerFleet);

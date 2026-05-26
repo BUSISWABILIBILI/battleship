@@ -14,7 +14,7 @@ function createBoard(
   handleCellClick = null,
   options = {},
 ) {
-  const { panelClass = "", subtitle = "" } = options;
+  const { panelClass = "", subtitle = "", targetSide = null } = options;
   const boardWrapper = document.createElement("section");
   boardWrapper.classList.add("board-panel");
 
@@ -92,8 +92,27 @@ function createBoard(
     }
   }
 
+  const boardArea = document.createElement("div");
+  boardArea.classList.add("board-area");
+
+  if (targetSide) {
+    boardArea.classList.add(`targets-${targetSide}`);
+  }
+
+  const fleetTargets = document.createElement("div");
+  fleetTargets.classList.add("fleet-targets");
+  fleetTargets.setAttribute("aria-label", `${boardName} ship targets`);
+
+  if (targetSide === "left") {
+    boardArea.append(fleetTargets, board);
+  } else if (targetSide === "right") {
+    boardArea.append(board, fleetTargets);
+  } else {
+    boardArea.appendChild(board);
+  }
+
   boardWrapper.appendChild(header);
-  boardWrapper.appendChild(board);
+  boardWrapper.appendChild(boardArea);
 
   container.appendChild(boardWrapper);
 
@@ -122,4 +141,51 @@ function renderShips(cells, ships) {
   }
 }
 
-export { clearShips, createBoard, formatCoordinate, renderShips };
+function renderFleetTargets(container, ships, ownerLabel) {
+  container.replaceChildren();
+
+  ships.forEach((shipData, index) => {
+    const target = document.createElement("div");
+    target.classList.add("fleet-target");
+    target.dataset.shipIndex = index;
+    target.title = `${shipData.name} (${shipData.ship.length})`;
+    target.setAttribute(
+      "aria-label",
+      `${ownerLabel} ${shipData.name}, length ${shipData.ship.length}, afloat`,
+    );
+
+    for (let segment = 0; segment < shipData.ship.length; segment++) {
+      const segmentElement = document.createElement("span");
+      segmentElement.classList.add("target-segment");
+      target.appendChild(segmentElement);
+    }
+
+    container.appendChild(target);
+  });
+}
+
+function updateFleetTargets(container, ships, ownerLabel) {
+  const targets = container.querySelectorAll(".fleet-target");
+
+  targets.forEach((target, index) => {
+    const shipData = ships[index];
+    const sunk = shipData.ship.isSunk();
+
+    target.classList.toggle("sunk", sunk);
+    target.setAttribute(
+      "aria-label",
+      `${ownerLabel} ${shipData.name}, length ${shipData.ship.length}, ${
+        sunk ? "sunk" : "afloat"
+      }`,
+    );
+  });
+}
+
+export {
+  clearShips,
+  createBoard,
+  formatCoordinate,
+  renderFleetTargets,
+  renderShips,
+  updateFleetTargets,
+};
