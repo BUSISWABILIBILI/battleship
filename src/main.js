@@ -69,6 +69,7 @@ app.append(gameHeader, boards);
 
 let gameOver = false;
 let gameStarted = false;
+let playerManualMisses = 0;
 
 const player = new Player("real");
 const computer = new Player("computer");
@@ -123,7 +124,7 @@ function updateStats() {
       "Ships sunk",
       `${getSunkCount(computer.gameboard)}/${computer.gameboard.ships.length}`,
     ),
-    renderStat("Misses", computer.gameboard.missedAttacks.length),
+    renderStat("Manual misses", playerManualMisses),
   );
 
   updateFleetTargets(playerFleetTargets, player.gameboard.ships, "Your fleet");
@@ -214,6 +215,10 @@ function handleComputerBoardClick(coordinates, cell) {
   const playerCoordinate = formatCoordinate(coordinates);
   const playerAttack = computer.gameboard.receiveAttack(coordinates);
   const playerResult = playerAttack.result;
+
+  if (playerResult === "miss") {
+    playerManualMisses += 1;
+  }
 
   markCell(cell, playerResult, playerCoordinate);
   markSurroundingMisses(
