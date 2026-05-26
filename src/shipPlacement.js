@@ -33,13 +33,18 @@ function createCoordinates(start, length, direction) {
   return coordinates;
 }
 
-function hasOverlap(existingShips, coordinates) {
+function coordinatesTouch(first, second) {
+  return (
+    Math.abs(first[0] - second[0]) <= 1 &&
+    Math.abs(first[1] - second[1]) <= 1
+  );
+}
+
+function hasPlacementConflict(existingShips, coordinates) {
   return existingShips.some((shipData) =>
     shipData.coordinates.some((shipCoordinate) =>
       coordinates.some(
-        (coordinate) =>
-          coordinate[0] === shipCoordinate[0] &&
-          coordinate[1] === shipCoordinate[1],
+        (coordinate) => coordinatesTouch(coordinate, shipCoordinate),
       ),
     ),
   );
@@ -55,7 +60,7 @@ function placeRandomShip(gameboard, ship) {
     const start = getRandomStart(length, direction);
 
     coordinates = createCoordinates(start, length, direction);
-  } while (hasOverlap(gameboard.ships, coordinates));
+  } while (hasPlacementConflict(gameboard.ships, coordinates));
 
   gameboard.placeShip(length, coordinates, name);
 }

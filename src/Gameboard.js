@@ -6,6 +6,13 @@ function coordinatesMatch(first, second) {
   return first[0] === second[0] && first[1] === second[1];
 }
 
+function coordinatesTouch(first, second) {
+  return (
+    Math.abs(first[0] - second[0]) <= 1 &&
+    Math.abs(first[1] - second[1]) <= 1
+  );
+}
+
 function isInsideBoard(coordinates) {
   const [x, y] = coordinates;
 
@@ -68,6 +75,18 @@ class Gameboard {
       throw new Error("Ships cannot overlap.");
     }
 
+    const touchesExistingShip = this.ships.some((shipData) =>
+      shipData.coordinates.some((shipCoordinate) =>
+        coordinates.some((coordinate) =>
+          coordinatesTouch(coordinate, shipCoordinate),
+        ),
+      ),
+    );
+
+    if (touchesExistingShip) {
+      throw new Error("Ships cannot touch.");
+    }
+
     const ship = new Ship(length);
 
     this.ships.push({
@@ -78,16 +97,74 @@ class Gameboard {
     });
   }
 
+  hasShipAt(coordinates) {
+    return this.ships.some((shipData) =>
+      shipData.coordinates.some((shipCoordinate) =>
+        coordinatesMatch(coordinates, shipCoordinate),
+      ),
+    );
+  }
+
+  hasBeenAttacked(coordinates) {
+    if (
+      this.missedAttacks.some((missedAttack) =>
+        coordinatesMatch(missedAttack, coordinates),
+      )
+    ) {
+      return true;
+    }
+
+    return this.ships.some((shipData) =>
+      shipData.hitCoordinates.some((hitCoordinate) =>
+        coordinatesMatch(hitCoordinate, coordinates),
+      ),
+    );
+  }
+
+  getSurroundingEmptyCoordinates(shipData) {
+    const surroundingCoordinates = [];
+
+    for (const [shipX, shipY] of shipData.coordinates) {
+      for (let y = shipY - 1; y <= shipY + 1; y++) {
+        for (let x = shipX - 1; x <= shipX + 1; x++) {
+          const coordinates = [x, y];
+
+          if (
+            !isInsideBoard(coordinates) ||
+            this.hasShipAt(coordinates) ||
+            surroundingCoordinates.some((existingCoordinates) =>
+              coordinatesMatch(existingCoordinates, coordinates),
+            )
+          ) {
+            continue;
+          }
+
+          surroundingCoordinates.push(coordinates);
+        }
+      }
+    }
+
+    return surroundingCoordinates;
+  }
+
+  markSurroundingMisses(shipData) {
+    const surroundingMisses = this.getSurroundingEmptyCoordinates(shipData);
+
+    for (const coordinates of surroundingMisses) {
+      if (!this.hasBeenAttacked(coordinates)) {
+        this.missedAttacks.push(coordinates);
+      }
+    }
+
+    return surroundingMisses;
+  }
+
   receiveAttack(attackCoordinates) {
     if (!isInsideBoard(attackCoordinates)) {
       throw new Error("Attacks must stay inside the board.");
     }
 
-    if (
-      this.missedAttacks.some((missedAttack) =>
-        coordinatesMatch(missedAttack, attackCoordinates),
-      )
-    ) {
+    if (this.hasBeenAttacked(attackCoordinates)) {
       return { coordinates: attackCoordinates, result: "repeat" };
     }
 
@@ -97,27 +174,20 @@ class Gameboard {
       );
 
       if (hit) {
-        const alreadyHit = shipData.hitCoordinates.some((coordinate) =>
-          coordinatesMatch(coordinate, attackCoordinates),
-        );
-
-        if (alreadyHit) {
-          return {
-            coordinates: attackCoordinates,
-            result: "repeat",
-            ship: shipData,
-            sunk: shipData.ship.isSunk(),
-          };
-        }
-
         shipData.hitCoordinates.push(attackCoordinates);
         shipData.ship.hit();
+
+        const sunk = shipData.ship.isSunk();
+        const surroundingMisses = sunk
+          ? this.markSurroundingMisses(shipData)
+          : [];
 
         return {
           coordinates: attackCoordinates,
           result: "hit",
           ship: shipData,
-          sunk: shipData.ship.isSunk(),
+          sunk,
+          surroundingMisses,
         };
       }
     }

@@ -68,6 +68,28 @@ test("reports when a ship is sunk", () => {
   expect(result.sunk).toBe(true);
 });
 
+test("marks empty surrounding squares when a ship is sunk", () => {
+  const gameboard = new Gameboard();
+
+  gameboard.placeShip(1, [[1, 1]]);
+
+  const result = gameboard.receiveAttack([1, 1]);
+
+  expect(result.surroundingMisses).toHaveLength(8);
+  expect(gameboard.missedAttacks).toEqual(
+    expect.arrayContaining([
+      [0, 0],
+      [1, 0],
+      [2, 0],
+      [0, 1],
+      [2, 1],
+      [0, 2],
+      [1, 2],
+      [2, 2],
+    ]),
+  );
+});
+
 test("does not count repeated attacks twice", () => {
   const gameboard = new Gameboard();
 
@@ -108,6 +130,16 @@ test("rejects diagonal ships", () => {
       [1, 1],
     ]);
   }).toThrow("Ships must be placed horizontally or vertically.");
+});
+
+test("rejects touching ships", () => {
+  const gameboard = new Gameboard();
+
+  gameboard.placeShip(1, [[0, 0]]);
+
+  expect(() => {
+    gameboard.placeShip(1, [[1, 1]]);
+  }).toThrow("Ships cannot touch.");
 });
 
 test("returns false if not all ships are sunk", () => {

@@ -1,5 +1,11 @@
 import Gameboard from "./Gameboard";
 
+const BOARD_SIZE = 10;
+
+function coordinatesMatch(first, second) {
+  return first[0] === second[0] && first[1] === second[1];
+}
+
 class Player {
   constructor(type = "real") {
     this.type = type;
@@ -8,20 +14,42 @@ class Player {
   }
 
   randomAttack(enemyGameboard) {
-    let attack;
+    const availableAttacks = [];
 
-    do {
-      attack = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
-    } while (
-      this.previousAttacks.some(
-        (previousAttack) =>
-          previousAttack[0] === attack[0] && previousAttack[1] === attack[1],
-      )
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let x = 0; x < BOARD_SIZE; x++) {
+        const coordinates = [x, y];
+
+        if (!enemyGameboard.hasBeenAttacked(coordinates)) {
+          availableAttacks.push(coordinates);
+        }
+      }
+    }
+
+    if (availableAttacks.length === 0) {
+      return null;
+    }
+
+    const attack =
+      availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
+    const result = enemyGameboard.receiveAttack(attack);
+
+    this.recordAttack(attack);
+    result.surroundingMisses?.forEach((coordinates) =>
+      this.recordAttack(coordinates),
     );
 
-    this.previousAttacks.push(attack);
+    return result;
+  }
 
-    return enemyGameboard.receiveAttack(attack);
+  recordAttack(coordinates) {
+    const alreadyRecorded = this.previousAttacks.some((previousAttack) =>
+      coordinatesMatch(previousAttack, coordinates),
+    );
+
+    if (!alreadyRecorded) {
+      this.previousAttacks.push(coordinates);
+    }
   }
 }
 

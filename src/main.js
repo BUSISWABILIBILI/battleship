@@ -156,6 +156,26 @@ function markCell(cell, result, label) {
   }
 }
 
+function markSurroundingMisses(cells, coordinatesList, boardName) {
+  coordinatesList.forEach((coordinates) => {
+    const cell = cells[coordinates.toString()];
+
+    if (!cell || cell.classList.contains("hit")) {
+      return;
+    }
+
+    const label = `${boardName} ${formatCoordinate(coordinates)}`;
+
+    cell.classList.add("miss", "auto-miss");
+    cell.setAttribute("aria-label", `${label}: empty around sunk ship`);
+    cell.title = `${label}: empty around sunk ship`;
+
+    if ("disabled" in cell) {
+      cell.disabled = true;
+    }
+  });
+}
+
 function disableComputerBoard() {
   Object.values(computerCells).forEach((cell) => {
     cell.disabled = true;
@@ -196,6 +216,11 @@ function handleComputerBoardClick(coordinates, cell) {
   const playerResult = playerAttack.result;
 
   markCell(cell, playerResult, playerCoordinate);
+  markSurroundingMisses(
+    computerCells,
+    playerAttack.surroundingMisses ?? [],
+    "Enemy Waters",
+  );
 
   if (computer.gameboard.allShipsSunk()) {
     statusMessage.textContent = `${formatAttackMessage(
@@ -210,11 +235,20 @@ function handleComputerBoardClick(coordinates, cell) {
   }
 
   const computerAttack = computer.randomAttack(player.gameboard);
+  if (!computerAttack) {
+    return;
+  }
+
   const playerCell = playerCells[computerAttack.coordinates.toString()];
   const computerCoordinate = formatCoordinate(computerAttack.coordinates);
   const computerResult = computerAttack.result;
 
   markCell(playerCell, computerResult, computerCoordinate);
+  markSurroundingMisses(
+    playerCells,
+    computerAttack.surroundingMisses ?? [],
+    "Your Fleet",
+  );
 
   if (player.gameboard.allShipsSunk()) {
     statusMessage.textContent = `${formatAttackMessage(
